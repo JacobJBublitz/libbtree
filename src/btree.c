@@ -11,8 +11,8 @@ void btree_destroy(btree *tree) {
     return btree_node_destroy(tree);
 }
 
-void btree_foreach(const btree *tree, btree_foreach_proc_t foreach_proc) {
-    btree_node_foreach(tree, foreach_proc);
+void btree_foreach(const btree *tree, btree_foreach_proc_t foreach_proc, void *user) {
+    btree_node_foreach(tree, foreach_proc, user);
 }
 
 btree_error btree_insert(btree *tree, const char *key, void *data) {
@@ -64,15 +64,15 @@ void btree_node_destroy(btree_node *node) {
     free(node);
 }
 
-void btree_node_foreach(const btree_node *node, btree_foreach_proc_t foreach_proc) {
+void btree_node_foreach(const btree_node *node, btree_foreach_proc_t foreach_proc, void *user) {
     if (node->left) {
-        btree_node_foreach(node->left, foreach_proc);
+        btree_node_foreach(node->left, foreach_proc, user);
     }
     if (node->right) {
-        btree_node_foreach(node->right, foreach_proc);
+        btree_node_foreach(node->right, foreach_proc, user);
     }
 
-    foreach_proc(node->key, node->data);
+    foreach_proc(node->key, node->data, user);
 }
 
 btree_error btree_node_insert(btree_node *parent, btree_node *node) {

@@ -18,13 +18,13 @@ typedef enum _btree_error {
 
 typedef btree_node btree;
 
-typedef void(*btree_foreach_proc_t)(const char *key, void *data);
+typedef void(*btree_foreach_proc_t)(const char *key, void *data, void *user);
 
 btree_error btree_create(btree **tree, const char *key, void *data);
 
 void btree_destroy(btree *tree);
 
-void btree_foreach(const btree *tree, btree_foreach_proc_t foreach_proc);
+void btree_foreach(const btree *tree, btree_foreach_proc_t foreach_proc, void *user);
 
 btree_error btree_insert(btree *tree, const char *key, void *data);
 
@@ -36,7 +36,7 @@ btree_error btree_node_create(btree_node **node, const char *key, void *data);
 
 void btree_node_destroy(btree_node *node);
 
-void btree_node_foreach(const btree_node *node, btree_foreach_proc_t foreach_proc);
+void btree_node_foreach(const btree_node *node, btree_foreach_proc_t foreach_proc, void *user);
 
 btree_error btree_node_insert(btree_node *parent, btree_node *new_node);
 
