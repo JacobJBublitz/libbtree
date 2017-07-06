@@ -10,8 +10,8 @@ void foreach_proc(const char *key, void *data, void *user) {
 
 int main(void) {
     btree *tree;
-    handle_error(btree_create(&tree, "Test1", (void *) 1));
-
+    handle_error(btree_create(&tree));
+    handle_error(btree_insert(tree, "Test1", (void *) 1));
     handle_error(btree_insert(tree, "Test0", (void *) 0));
     handle_error(btree_insert(tree, "Test2", (void *) 2));
     handle_error(btree_insert(tree, "Test3", (void *) 3));
