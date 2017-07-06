@@ -9,3 +9,6 @@ target_link_libraries(foreach PRIVATE common)
 
 add_executable(remove remove.c)
 target_link_libraries(remove PRIVATE common)
+
+add_executable(root_remove root_remove.c)
+target_link_libraries(root_remove PRIVATE common)

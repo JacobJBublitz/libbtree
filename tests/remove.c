@@ -4,8 +4,9 @@
 
 int main(void) {
     btree *tree;
-    handle_error(btree_create(&tree, "Test", NULL));
+    handle_error(btree_create(&tree));
 
+    handle_error(btree_insert(tree, "Test", NULL));
     handle_error(btree_insert(tree, "Test1", (void *) 1));
     handle_error(btree_insert(tree, "Test2", (void *) 2));
 

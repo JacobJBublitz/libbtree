@@ -3,10 +3,13 @@
 
 #include <stdbool.h>
 
+struct _btree;
+
 typedef struct _btree_node {
     char *key;
     void *data;
     struct _btree_node *parent, *left, *right;
+    struct _btree *tree;
 } btree_node;
 
 typedef enum _btree_error {
@@ -16,11 +19,13 @@ typedef enum _btree_error {
     BTREE_ERROR_KEY_ALREADY_EXISTS = 3
 } btree_error;
 
-typedef btree_node btree;
+typedef struct _btree {
+    btree_node *root;
+} btree;
 
 typedef void(*btree_foreach_proc_t)(const char *key, void *data);
 
-btree_error btree_create(btree **tree, const char *key, void *data);
+btree_error btree_create(btree **tree);
 
 void btree_destroy(btree *tree);
 
