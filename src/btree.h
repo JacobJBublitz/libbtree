@@ -23,7 +23,7 @@ typedef struct _btree {
     btree_node *root;
 } btree;
 
-typedef void(*btree_foreach_proc_t)(const char *key, void *data);
+typedef void(*btree_foreach_proc_t)(const char *key, void *data, void *user);
 
 /**
  * Create a new btree.
@@ -41,8 +41,9 @@ void btree_destroy(btree *tree);
  * Execute a function on all nodes of a tree.
  * @param[in] tree         The tree to execute the funcion on.
  * @param[in] foreach_proc The function to execute.
+ * @param[in] user         A user defined value passed to foreach_proc.
  */
-void btree_foreach(const btree *tree, btree_foreach_proc_t foreach_proc);
+void btree_foreach(const btree *tree, btree_foreach_proc_t foreach_proc, void *user);
 
 /**
  * Add a new node to a btree.
@@ -87,8 +88,9 @@ void btree_node_destroy(btree_node *node);
  * Execute a function on this node and all its children.
  * @param[in] node         The node to execute on.
  * @param[in] foreach_proc The function to execute.
+ * @param[in] user         A user defined value passed to foreach_proc.
  */
-void btree_node_foreach(const btree_node *node, btree_foreach_proc_t foreach_proc);
+void btree_node_foreach(const btree_node *node, btree_foreach_proc_t foreach_proc, void *user);
 
 /**
  * Insert a node as a child of a parent node.
