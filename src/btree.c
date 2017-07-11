@@ -3,16 +3,27 @@
 #include <stdlib.h>
 #include <string.h>
 
-btree_error btree_create(btree **tree, const char *key, void *data) {
-    return btree_node_create(tree, key, data);
+btree_error btree_create(btree **tree) {
+    *tree = calloc(1, sizeof(btree));
+    if (!*tree) {
+        return BTREE_ERROR_OUT_OF_MEMORY;
+    }
+
+    return BTREE_ERROR_NONE;
 }
 
 void btree_destroy(btree *tree) {
-    return btree_node_destroy(tree);
+    if (tree->root) {
+        btree_node_destroy(tree->root);
+    }
+
+    free(tree);
 }
 
 void btree_foreach(const btree *tree, btree_foreach_proc_t foreach_proc, void *user) {
-    btree_node_foreach(tree, foreach_proc, user);
+    if (tree->root) {
+        btree_node_foreach(tree->root, foreach_proc, user);
+    }
 }
 
 btree_error btree_insert(btree *tree, const char *key, void *data) {
@@ -22,18 +33,34 @@ btree_error btree_insert(btree *tree, const char *key, void *data) {
         return error;
     }
 
-    error = btree_node_insert(tree, new_node);
-    if (error != BTREE_ERROR_NONE) {
-        return error;
+    if (tree->root) {
+        error = btree_node_insert(tree->root, new_node);
+        if (error != BTREE_ERROR_NONE) {
+            btree_node_destroy(new_node);
+            return error;
+        }
+    } else {
+        tree->root = new_node;
+        new_node->tree = tree;
     }
+
+    return BTREE_ERROR_NONE;
 }
 
 btree_error btree_remove(btree *tree, const char *key, void **data) {
-    return btree_node_remove(tree, key, data);
+    if (tree->root) {
+        return btree_node_remove(tree->root, key, data);
+    } else {
+        return BTREE_ERROR_KEY_NOT_FOUND;
+    }
 }
 
 btree_error btree_search(const btree *tree, const char *key, void **data) {
-    return btree_node_search(tree, key, data);
+    if (tree->root) {
+        return btree_node_search(tree->root, key, data);
+    } else {
+        return BTREE_ERROR_KEY_NOT_FOUND;
+    }
 }
 
 btree_error btree_node_create(btree_node **node, const char *key, void *data) {
@@ -44,6 +71,11 @@ btree_error btree_node_create(btree_node **node, const char *key, void *data) {
 
     // Copy the key
     (*node)->key = calloc(strlen(key) + 1, sizeof(char));
+    if (!(*node)->key) {
+        free(*node);
+        return BTREE_ERROR_OUT_OF_MEMORY;
+    }
+
     memcpy((*node)->key, key, strlen(key) * sizeof(char));
 
     // Set the data
@@ -83,20 +115,21 @@ btree_error btree_node_insert(btree_node *parent, btree_node *node) {
             return btree_node_insert(parent->right, node);
         } else {
             parent->right = node;
-            node->parent = parent;
-            return BTREE_ERROR_NONE;
         }
     } else if (result < 0) {
         if (parent->left) {
             return btree_node_insert(parent->left, node);
         } else {
             parent->left = node;
-            node->parent = parent;
-            return BTREE_ERROR_NONE;
         }
     } else {
         return BTREE_ERROR_KEY_ALREADY_EXISTS;
     }
+
+    node->parent = parent;
+    node->tree = parent->tree;
+
+    return BTREE_ERROR_NONE;
 }
 
 btree_error btree_node_remove(btree_node *node, const char *key, void **data) {
@@ -175,10 +208,14 @@ btree_error btree_node_remove(btree_node *node, const char *key, void **data) {
             child->left = child->right = NULL;
             btree_node_destroy(child);
         } else {
-            if (node == node->parent->left) {
-                node->parent->left = NULL;
+            if (node->parent) {
+                if (node == node->parent->left) {
+                    node->parent->left = NULL;
+                } else {
+                    node->parent->right = NULL;
+                }
             } else {
-                node->parent->right = NULL;
+                node->tree->root = NULL;
             }
 
             btree_node_destroy(node);
