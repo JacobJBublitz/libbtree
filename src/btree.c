@@ -20,9 +20,9 @@ void btree_destroy(btree *tree) {
     free(tree);
 }
 
-void btree_foreach(const btree *tree, btree_foreach_proc_t foreach_proc) {
+void btree_foreach(const btree *tree, btree_foreach_proc_t foreach_proc, void *user) {
     if (tree->root) {
-        btree_node_foreach(tree->root, foreach_proc);
+        btree_node_foreach(tree->root, foreach_proc, user);
     }
 }
 
